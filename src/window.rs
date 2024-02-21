@@ -39,10 +39,8 @@ impl GlWindow{
             }
             self.window.swap_buffers();
     
-            // Collect events
             let events: Vec<(f64, WindowEvent)> = glfw::flush_messages(&self.events).collect();
     
-            // Handle events
             for (_, event) in events {
                 self.handle_event(event);
             }

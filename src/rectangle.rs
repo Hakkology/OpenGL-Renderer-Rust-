@@ -5,16 +5,25 @@ use std::ptr;
 use gl::types::{GLuint, GLfloat};
 use crate::draw::Shape;
 use std::rc::Rc;  // Import Rc for reference counting
+use crate::vector2d::Vector2D;
 
 pub struct Rectangle {
     vao: GLuint,
     vbo: GLuint,
     shader: Rc<Shader>,  // Use Rc<Shader>
+    top_right: Vector2D,
+    bottom_left: Vector2D,
 }
 
 impl Rectangle {
-    pub fn new(shader: Rc<Shader>) -> Rectangle {  // Accept Rc<Shader> as input
-        let mut rectangle = Rectangle { vao: 0, vbo: 0, shader };
+    pub fn new(shader: Rc<Shader>, top_right: Vector2D, bottom_left: Vector2D) -> Rectangle {  // Accept Rc<Shader> as input
+        let mut rectangle = Rectangle { 
+            vao: 0, 
+            vbo: 0, 
+            shader,
+            top_right,
+            bottom_left,
+        };
         rectangle.init();
         rectangle
     }
@@ -23,10 +32,10 @@ impl Rectangle {
 impl Shape for Rectangle {
     fn init(&mut self) {
         let vertices: [GLfloat; 12] = [
-            0.5, 0.0, 0.0,  
-            0.5, -0.5, 0.0,  
-            -0.5, -0.5, 0.0, 
-            -0.5, 0.0, 0.0   
+            self.top_right.x, self.top_right.y, 0.0,
+            self.top_right.x, self.bottom_left.y, 0.0,
+            self.bottom_left.x, self.bottom_left.y, 0.0,
+            self.bottom_left.x, self.top_right.y, 0.0,
         ];
 
         unsafe {
@@ -63,6 +72,15 @@ impl Shape for Rectangle {
             gl::BindVertexArray(self.vao);
             gl::DrawArrays(gl::TRIANGLE_FAN, 0, 4);
             gl::BindVertexArray(0);
+        }
+    }
+}
+
+impl Drop for Rectangle {
+    fn drop(&mut self) {
+        unsafe {
+            gl::DeleteVertexArrays(1, &self.vao);
+            gl::DeleteBuffers(1, &self.vbo);
         }
     }
 }

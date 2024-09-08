@@ -7,7 +7,8 @@ use crate::triangle::Triangle;
 use crate::rectangle::Rectangle;
 use crate::circle::Circle;
 use crate::shader::Shader;
-    
+use crate::vector2d::Vector2D;
+
 pub struct Application {
     window: GlWindow,
     shapes: Vec<Box<dyn Shape>>,
@@ -19,18 +20,41 @@ impl Application {
         Application { window, shapes: Vec::new() }
     }
 
-
     pub fn init_gl(&mut self) {
         self.window.init_gl();
 
         // Load different fragment shaders and wrap them in Rc
         let orange_shader = Rc::new(Shader::new("src/Shaders/vertex_shader.glsl", "src/Shaders/orange_fragment_shader.glsl"));
         let red_shader = Rc::new(Shader::new("src/Shaders/vertex_shader.glsl", "src/Shaders/red_fragment_shader.glsl"));
+        let gradient_shader = Rc::new(Shader::new("src/Shaders/vertex_shader.glsl", "src/Shaders/gradient_fragment_shader.glsl"));
+        let normal_shader = Rc::new(Shader::new("src/Shaders/vertex_shader.glsl", "src/Shaders/normal_fragment_shader.glsl"));
 
         // Initialize shapes with shared Rc<Shader>
-        self.shapes.push(Box::new(Triangle::new(orange_shader.clone())));
-        self.shapes.push(Box::new(Rectangle::new(red_shader.clone()))); 
-        self.shapes.push(Box::new(Circle::new(red_shader.clone()))); 
+        let triangle = Box::new(Triangle::new(
+            orange_shader.clone(),
+            Vector2D::new(-0.5, 0.2),
+            Vector2D::new(0.5, 0.2),
+            Vector2D::new(0.0, 0.8)
+        ));
+        self.shapes.push(triangle);
+
+        let normal_triangle = Box::new(Triangle::new(
+            normal_shader.clone(),
+            Vector2D::new(-0.9, 0.8),
+            Vector2D::new(-0.9, -0.8),
+            Vector2D::new(-0.6, 0.0)
+        ));
+        self.shapes.push(normal_triangle);
+
+        let rectangle = Box::new(Rectangle::new(
+            red_shader.clone(),
+            Vector2D::new(0.5, 0.0),   // top_right
+            Vector2D::new(-0.5, -0.5)  // bottom_left
+        ));
+        self.shapes.push(rectangle);
+        
+        let circle = Box::new(Circle::new(Vector2D::new(0.75, 0.75), 0.2, gradient_shader.clone()));
+        self.shapes.push(circle);
     }
 
     pub fn run(&mut self) {
@@ -55,7 +79,6 @@ impl Application {
             }
         }
 
-            // Perform cleanup when exiting
         self.cleanup();
 
     }

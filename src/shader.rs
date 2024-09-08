@@ -7,7 +7,7 @@ use std::str;
 use gl::types::*;
 
 pub struct Shader {
-    id: GLuint,
+    id: gl::types::GLuint,
 }
 
 impl Shader {

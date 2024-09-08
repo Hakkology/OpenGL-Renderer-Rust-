@@ -1,15 +1,14 @@
-// main.rs
-
-extern crate glfw;  // External crate for managing window and OpenGL context
-extern crate gl;    // External crate for accessing OpenGL functions
+extern crate glfw;  
+extern crate gl;    
 
 mod window;
 mod app;
-mod draw;    // Import the draw module
-mod triangle;  // Import the triangle module
-mod rectangle;
-mod circle;
 mod shader;
+mod draw;
+mod circle;
+mod triangle;
+mod rectangle;
+mod vector2d;
 
 use app::Application;
 

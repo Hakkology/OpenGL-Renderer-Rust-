@@ -5,16 +5,29 @@ use std::ptr;
 use gl::types::{GLuint, GLfloat};
 use crate::draw::Shape;
 use std::rc::Rc;  // Import Rc for reference counting
+use crate::vector2d::Vector2D;  // Import Vector2D
 
 pub struct Triangle {
     vao: GLuint,
     vbo: GLuint,
-    shader: Rc<Shader>,  // Use Rc to allow shared ownership
+    shader: Rc<Shader>,
+    vertices: [Vector2D; 3],
+    normals: [Vector2D; 3],
 }
 
 impl Triangle {
-    pub fn new(shader: Rc<Shader>) -> Triangle {  // Take Rc<Shader> as input
-        let mut triangle = Triangle { vao: 0, vbo: 0, shader };
+    pub fn new(shader: Rc<Shader>, v1: Vector2D, v2: Vector2D, v3: Vector2D) -> Triangle {
+        let edge1 = Vector2D::new(v2.x - v1.x, v2.y - v1.y);
+        let edge2 = Vector2D::new(v3.x - v1.x, v3.y - v1.y);
+        let normal = Vector2D::new(edge1.y, -edge1.x).normalize();
+
+        let mut triangle = Triangle { 
+            vao: 0, 
+            vbo: 0, 
+            shader,
+            vertices: [v1, v2, v3],
+            normals: [normal, normal, normal],
+        };
         triangle.init();
         triangle
     }
@@ -22,11 +35,13 @@ impl Triangle {
 
 impl Shape for Triangle {
     fn init(&mut self) {
-        let vertices: [GLfloat; 9] = [
-            -0.5, 0.2, 0.0,  
-             0.5, 0.2, 0.0,  
-             0.0,  0.8, 0.0,  
-        ];
+        let mut vertices: Vec<GLfloat> = Vec::new();
+        for i in 0..3 {
+            vertices.extend_from_slice(&[
+                self.vertices[i].x, self.vertices[i].y, 0.0,
+                self.normals[i].x, self.normals[i].y, 1.0,
+            ]);
+        }
 
         unsafe {
             gl::GenVertexArrays(1, &mut self.vao);
@@ -42,15 +57,12 @@ impl Shape for Triangle {
                 gl::STATIC_DRAW,
             );
 
-            gl::VertexAttribPointer(
-                0, 
-                3, 
-                gl::FLOAT, 
-                gl::FALSE, 
-                3 * std::mem::size_of::<GLfloat>() as i32, 
-                ptr::null(),
-            );
+            // Update the stride and offset to match the new vertex shader
+            gl::VertexAttribPointer(0, 3, gl::FLOAT, gl::FALSE, 6 * std::mem::size_of::<GLfloat>() as i32, ptr::null());
             gl::EnableVertexAttribArray(0);
+
+            gl::VertexAttribPointer(1, 3, gl::FLOAT, gl::FALSE, 6 * std::mem::size_of::<GLfloat>() as i32, (3 * std::mem::size_of::<GLfloat>()) as *const _);
+            gl::EnableVertexAttribArray(1);
 
             gl::BindVertexArray(0);
         }

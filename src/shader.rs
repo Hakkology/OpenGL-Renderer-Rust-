@@ -11,7 +11,7 @@ pub struct Shader {
 }
 
 impl Shader {
-    // Create a new shader program by loading, compiling, and linking vertex and fragment shaders
+    // Yeni bir shader programı oluşturur
     pub fn new(vertex_path: &str, fragment_path: &str) -> Shader {
         let vertex_code = Shader::read_shader_source(vertex_path);
         let fragment_code = Shader::read_shader_source(fragment_path);
@@ -21,7 +21,6 @@ impl Shader {
 
         let program_id = Shader::link_program(vertex_shader, fragment_shader);
 
-        // Clean up shaders after linking
         unsafe {
             gl::DeleteShader(vertex_shader);
             gl::DeleteShader(fragment_shader);
@@ -30,22 +29,22 @@ impl Shader {
         Shader { id: program_id }
     }
 
-    // Use the shader program
+    // Shader programını kullanır
     pub fn use_program(&self) {
         unsafe {
             gl::UseProgram(self.id);
         }
     }
 
-    // Utility function to read shader source code from file
+    // Shader kaynak kodunu dosyadan okur
     fn read_shader_source(path: &str) -> String {
-        let mut file = File::open(path).expect("Failed to open shader file");
+        let mut file = File::open(path).expect("Shader dosyası açılamadı");
         let mut source = String::new();
-        file.read_to_string(&mut source).expect("Failed to read shader file");
+        file.read_to_string(&mut source).expect("Shader dosyası okunamadı");
         source
     }
 
-    // Utility function to compile a shader
+    // Shader'ı derler
     fn compile_shader(source: &str, shader_type: GLenum) -> GLuint {
         let shader;
         unsafe {
@@ -54,7 +53,6 @@ impl Shader {
             gl::ShaderSource(shader, 1, &c_str.as_ptr(), ptr::null());
             gl::CompileShader(shader);
 
-            // Check for shader compile errors
             let mut success = gl::FALSE as GLint;
             gl::GetShaderiv(shader, gl::COMPILE_STATUS, &mut success);
             if success != gl::TRUE as GLint {
@@ -62,13 +60,13 @@ impl Shader {
                 gl::GetShaderiv(shader, gl::INFO_LOG_LENGTH, &mut len);
                 let error = CString::from_vec_unchecked(vec![b' '; len as usize]);
                 gl::GetShaderInfoLog(shader, len, ptr::null_mut(), error.as_ptr() as *mut GLchar);
-                panic!("Shader compilation failed: {}", error.to_str().unwrap());
+                panic!("Shader derleme hatası: {}", error.to_str().unwrap());
             }
         }
         shader
     }
 
-    // Utility function to link the vertex and fragment shaders into a program
+    // Vertex ve fragment shader'ları birleştirir
     fn link_program(vertex_shader: GLuint, fragment_shader: GLuint) -> GLuint {
         let program;
         unsafe {
@@ -77,7 +75,6 @@ impl Shader {
             gl::AttachShader(program, fragment_shader);
             gl::LinkProgram(program);
 
-            // Check for linking errors
             let mut success = gl::FALSE as GLint;
             gl::GetProgramiv(program, gl::LINK_STATUS, &mut success);
             if success != gl::TRUE as GLint {
@@ -85,13 +82,13 @@ impl Shader {
                 gl::GetProgramiv(program, gl::INFO_LOG_LENGTH, &mut len);
                 let error = CString::from_vec_unchecked(vec![b' '; len as usize]);
                 gl::GetProgramInfoLog(program, len, ptr::null_mut(), error.as_ptr() as *mut GLchar);
-                panic!("Program linking failed: {}", error.to_str().unwrap());
+                panic!("Program bağlama hatası: {}", error.to_str().unwrap());
             }
         }
         program
     }
 
-    // Add this new method to get the shader program ID
+    // Shader program ID'sini döndürür
     pub fn id(&self) -> gl::types::GLuint {
         self.id
     }

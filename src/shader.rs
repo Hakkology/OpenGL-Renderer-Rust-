@@ -90,4 +90,9 @@ impl Shader {
         }
         program
     }
+
+    // Add this new method to get the shader program ID
+    pub fn id(&self) -> gl::types::GLuint {
+        self.id
+    }
 }

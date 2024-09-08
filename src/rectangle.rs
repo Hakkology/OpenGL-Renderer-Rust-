@@ -16,6 +16,7 @@ pub struct Rectangle {
 }
 
 impl Rectangle {
+    // Yeni bir dikdörtgen oluşturur
     pub fn new(shader: Rc<Shader>, top_right: Vector2D, bottom_left: Vector2D) -> Rectangle {  // Accept Rc<Shader> as input
         let mut rectangle = Rectangle { 
             vao: 0, 
@@ -30,6 +31,7 @@ impl Rectangle {
 }
 
 impl Shape for Rectangle {
+    // Dikdörtgeni başlatır ve OpenGL'e yükler
     fn init(&mut self) {
         let vertices: [GLfloat; 12] = [
             self.top_right.x, self.top_right.y, 0.0,
@@ -66,6 +68,7 @@ impl Shape for Rectangle {
         }
     }
 
+    // Dikdörtgeni çizer
     fn draw(&self) {
         unsafe {
             self.shader.use_program();  // Use the shader before drawing
@@ -77,6 +80,7 @@ impl Shape for Rectangle {
 }
 
 impl Drop for Rectangle {
+    // Dikdörtgen silindiğinde OpenGL kaynaklarını temizler
     fn drop(&mut self) {
         unsafe {
             gl::DeleteVertexArrays(1, &self.vao);

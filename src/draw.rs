@@ -1,9 +1,9 @@
 extern crate gl;
 
 pub trait Shape {
-    // Method to initialize vertex data
+    // Şekli başlatır
     fn init(&mut self);
 
-    // Method to draw the shape
+    // Şekli çizer
     fn draw(&self);
 }

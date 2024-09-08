@@ -16,6 +16,7 @@ pub struct Triangle {
 }
 
 impl Triangle {
+    // Yeni bir üçgen oluşturur
     pub fn new(shader: Rc<Shader>, v1: Vector2D, v2: Vector2D, v3: Vector2D) -> Triangle {
         let edge1 = Vector2D::new(v2.x - v1.x, v2.y - v1.y);
         let edge2 = Vector2D::new(v3.x - v1.x, v3.y - v1.y);
@@ -34,6 +35,7 @@ impl Triangle {
 }
 
 impl Shape for Triangle {
+    // Üçgeni başlatır ve OpenGL'e yükler
     fn init(&mut self) {
         let mut vertices: Vec<GLfloat> = Vec::new();
         for i in 0..3 {
@@ -68,6 +70,7 @@ impl Shape for Triangle {
         }
     }
 
+    // Üçgeni çizer
     fn draw(&self) {
         unsafe {
             self.shader.use_program();  // Use the shader before drawing

@@ -17,6 +17,7 @@ pub struct Circle {
 }
 
 impl Circle {
+    // Yeni bir daire oluşturur
     pub fn new(center: Vector2D, radius: f32, shader: Rc<Shader>) -> Self {
         let mut circle = Circle {
             center,
@@ -29,9 +30,29 @@ impl Circle {
         circle.init();
         circle
     }
+
+    // Daire köşe noktalarını oluşturur
+    fn generate_circle_vertices(radius: f32, segments: i32, center: &Vector2D) -> (Vec<f32>, Vec<f32>) {
+        let mut vertices = Vec::new();
+        let mut tex_coords = Vec::new();
+
+        for i in 0..=segments {
+            let theta = 2.0 * std::f32::consts::PI * (i as f32) / (segments as f32);
+            let x = center.x + radius * theta.cos();
+            let y = center.y + radius * theta.sin();
+            vertices.extend_from_slice(&[x, y, 0.0]);
+            
+            let tx = (theta.cos() + 1.0) / 2.0;
+            let ty = (theta.sin() + 1.0) / 2.0;
+            tex_coords.extend_from_slice(&[tx, ty]);
+        }
+
+        (vertices, tex_coords)
+    }
 }
 
 impl Shape for Circle {
+    // Daireyi başlatır ve OpenGL'e yükler
     fn init(&mut self) {
         let (vertices, tex_coords) = Circle::generate_circle_vertices(self.radius, 40, &self.center);
         self.num_vertices = vertices.len() as i32 / 3;
@@ -81,6 +102,7 @@ impl Shape for Circle {
         }
     }
 
+    // Daireyi çizer
     fn draw(&self) {
         unsafe {
             self.shader.use_program();
@@ -92,31 +114,11 @@ impl Shape for Circle {
 }
 
 impl Drop for Circle {
+    // Daire silindiğinde OpenGL kaynaklarını temizler
     fn drop(&mut self) {
         unsafe {
-            // Clean up VAO and VBO
             gl::DeleteVertexArrays(1, &self.vao);
             gl::DeleteBuffers(1, &self.vbo);
         }
-    }
-}
-
-impl Circle {
-    fn generate_circle_vertices(radius: f32, segments: i32, center: &Vector2D) -> (Vec<f32>, Vec<f32>) {
-        let mut vertices = Vec::new();
-        let mut tex_coords = Vec::new();
-
-        for i in 0..=segments {
-            let theta = 2.0 * std::f32::consts::PI * (i as f32) / (segments as f32);
-            let x = center.x + radius * theta.cos();
-            let y = center.y + radius * theta.sin();
-            vertices.extend_from_slice(&[x, y, 0.0]);
-            
-            let tx = (theta.cos() + 1.0) / 2.0;
-            let ty = (theta.sin() + 1.0) / 2.0;
-            tex_coords.extend_from_slice(&[tx, ty]);
-        }
-
-        (vertices, tex_coords)
     }
 }

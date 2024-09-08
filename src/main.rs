@@ -9,6 +9,8 @@ mod circle;
 mod triangle;
 mod rectangle;
 mod vector2d;
+mod vector3d;  // Add this line
+mod cube;  // Add this line
 
 use app::Application;
 
